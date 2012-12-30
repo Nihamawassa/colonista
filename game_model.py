@@ -6,6 +6,7 @@ Created on 26.08.2012
 
 from agents_model import Nature, CentralState, Colonist
 from places_model import TradingPost, House
+from job_manager import JobManager
 
 
 class GameModel(object):
@@ -36,6 +37,8 @@ class GameModel(object):
         self.tradingpost.store = {"money": 1000, "food": 1000,
                                   "clothing": 1000}
         self.pricelist = {"food": 10, "clothing": 10}
+        
+        self.jm = JobManager(self.colonistlist)
 
     def create_colonist(self, name):
         self.colonist_counter += 1
@@ -50,10 +53,11 @@ class GameModel(object):
         self.calendar_instance.increase_time()
         for colonist in self.colonistlist:
             colonist.update_colonist()
+        self.jm.update_jobmanager(self.colonistlist)
 
 
 class Calendar(object):
-    """
+    """Calendar definitions
     1 year has 4 seasons, 1 season has 10 days
     """
 

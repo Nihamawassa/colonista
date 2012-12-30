@@ -5,6 +5,17 @@ Created on 08.12.2012
 '''
 
 
+class JobManager(object):
+    
+    colonistlist = []
+    
+    def __init__(self, cl):
+        self.colonistlist = cl
+
+    def update_jobmanager(self, cl):
+        self.colonistlist = cl
+
+
 class Job(object):
 
     def __init__(self, name):

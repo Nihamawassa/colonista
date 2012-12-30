@@ -37,8 +37,7 @@ class Building(Place):
         self.prize = 0
         self.storage = {}
 
-        """ Register new building in the building dictionary
-        """
+        # Register new building in the building dictionary
         self.ID = self.gm.get_building_ID()
         if self.ID in self.gm.buildingdict:
             print "Error: duplicate ID in buildinglist"
@@ -104,21 +103,20 @@ class Farm(Workplace):
         self.name = "Farm"
         self.set_placename(self.name)
 
-        """ input factors and coefficients
-        """
+        # input factors and coefficients
         self.fields = 1
         self.field_technology = 1
         self.contracted_workers = 0
         self.worker_skill = 0
 
-        """ output factors and coefficients
-        """
+        # output factors and coefficients
         self.food = 0
         self.food_output = 3
 
     def update_workplace(self):
         if self.active == True:
             Workplace.update_worplace(self)
+            self.calculate_inputs()
             self.make_labor_contracts()
             self.calculate_output()
             self.calculate_costs()
@@ -126,11 +124,15 @@ class Farm(Workplace):
     def expand_farm(self):
         self.fields += 1
 
+    def calculate_inputs(self):
+        pass
+
     def make_labor_contracts(self):
         pass
 
     def calculate_output(self):
-        """ Use Leontief production function for output calculation.
+        """Production function
+        Use Leontief production function for output calculation.
         """
         input1 = self.fields / (self.field_technology * 1)
         input2 = self.contracted_workers / (self.worker_skill * 1)
