@@ -5,7 +5,7 @@ Created on 26.08.2012
 '''
 
 from agents_model import Nature, CentralState, Colonist
-from places_model import TradingPost, House
+from places_model import TradingPost, House, Farm
 from job_manager import JobManager
 
 
@@ -33,12 +33,15 @@ class GameModel(object):
                              7: House(self, 0, 6, self.colonistlist[6]),
                              8: House(self, 0, 7, self.colonistlist[7]),
                              9: House(self, 0, 8, self.colonistlist[8])}
+        
         self.tradingpost = TradingPost(self, 0, 9)
         self.tradingpost.store = {"money": 1000, "food": 1000,
                                   "clothing": 1000}
         self.pricelist = {"food": 10, "clothing": 10}
         
-        self.jm = JobManager(self.colonistlist)
+        self.workplacelist = [Farm(self, 0, 10, self.state, 1)]
+        
+        self.jm = JobManager(self.colonistlist, self.workplacelist)
 
     def create_colonist(self, name):
         self.colonist_counter += 1
@@ -50,10 +53,17 @@ class GameModel(object):
         return self.buildingID
 
     def resolve_turn_phase(self):
+        # forward time
         self.calendar_instance.increase_time()
+        # determine AI actions
+        for workplace in self.workplacelist:
+            workplace.initialize_production()
         for colonist in self.colonistlist:
             colonist.update_colonist()
-        self.jm.update_jobmanager(self.colonistlist)
+        self.jm.update_jobmanager(self.colonistlist, self.workplacelist)
+        for workplace in self.workplacelist:
+            workplace.update_workplace()
+        # check if game ending state is reached
 
 
 class Calendar(object):

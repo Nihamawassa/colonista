@@ -80,14 +80,15 @@ class TradingPost(Building):
 
 class Workplace(Building):
 
-    def __init__(self, gamemodel, x, y, newowner):
+    def __init__(self, gamemodel, x, y, newowner, id):
         Building.__init__(self, gamemodel, x, y)
         oldowner = self.owner
         self.change_owner(oldowner, newowner)
+        self.id = id
 
         self.active = True
 
-    def update_worplace(self):
+    def update_workplace(self):
         if self.active:
             # perform update according to process rule
             pass
@@ -97,15 +98,17 @@ class Workplace(Building):
 
 class Farm(Workplace):
 
-    def __init__(self, gamemodel, x, y, newowner):
-        Workplace.__init__(self, gamemodel, x, y, newowner)
+    def __init__(self, gamemodel, x, y, newowner, id):
+        Workplace.__init__(self, gamemodel, x, y, newowner, id)
 
         self.name = "Farm"
         self.set_placename(self.name)
+        self.job_name = "farmwork"
 
         # input factors and coefficients
         self.fields = 1
         self.field_technology = 1
+        self.needed_workers = 0
         self.contracted_workers = 0
         self.worker_skill = 0
 
@@ -113,19 +116,19 @@ class Farm(Workplace):
         self.food = 0
         self.food_output = 3
 
+    def expand_farm(self):
+        self.fields += 1
+    
+    def initialize_production(self):
+        if self.active == True:
+            self.needed_workers = self.fields
+    
     def update_workplace(self):
         if self.active == True:
-            Workplace.update_worplace(self)
-            self.calculate_inputs()
+            Workplace.update_workplace(self)
             self.make_labor_contracts()
             self.calculate_output()
             self.calculate_costs()
-
-    def expand_farm(self):
-        self.fields += 1
-
-    def calculate_inputs(self):
-        pass
 
     def make_labor_contracts(self):
         pass
