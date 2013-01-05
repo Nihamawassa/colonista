@@ -82,11 +82,13 @@ class Workplace(Building):
 
     def __init__(self, gamemodel, x, y, newowner, id):
         Building.__init__(self, gamemodel, x, y)
+        
         oldowner = self.owner
         self.change_owner(oldowner, newowner)
-        self.id = id
 
+        self.id = id
         self.active = True
+        self.wage = 0
 
     def update_workplace(self):
         if self.active:
@@ -143,4 +145,6 @@ class Farm(Workplace):
 
     def calculate_costs(self):
         pass
-
+    
+    def set_wage(self, wage):
+        self.wage = wage

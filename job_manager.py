@@ -21,20 +21,22 @@ class JobManager(object):
         self.workplacelist = wl
         for colonist in self.colonistlist:
             if colonist.job == "Unemployed":
-                self.freeworkforce = self.freeworkforce[:] + [colonist.id]
+                self.freeworkforce.append(colonist.id)
         for workplace in self.workplacelist:
             if workplace.needed_workers != 0:
-                self.joblist = self.joblist[:] + [Job(workplace.job_name, workplace.id)]
+                self.joblist.append(Job(workplace.job_name, workplace.id, workplace.wage))
+        self.workplacelist = sorted(self.workplacelist, key=attrgetter('wage')) # sort by wage
         if len(self.freeworkforce) < len(self.joblist):
-            pass
+            del self.joblist[-(self.joblist-self.freeworkforce)]
 
 
 class Job(object):
 
-    def __init__(self, name, id):
+    def __init__(self, name, id, wage):
         self.name = name
         self.workplace_id = id
         self.worker = 0
+        self.wage = wage
 
     def update_job(self):
         pass
