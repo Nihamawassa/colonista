@@ -57,8 +57,10 @@ class Colonist(Agent):
         self.stock["health"] = 99               # range 0-99
         self.stock["food"] = 20                 # range 0-20
         self.stock["clothing"] = 80             # range 0-80
-        self.stock["farmingSkill"] = 0          # range 0-99
-        self.stock["handcraftingSkill"] = 0     # range 0-99
+        self.stock["farming_skill"] = 1          # range 1-99
+        self.stock["handcrafting_skill"] = 1     # range 1-99
+        
+        self.shopping_list = {}
 
     def get_name(self):
         return self.name
@@ -73,6 +75,23 @@ class Colonist(Agent):
             if owner == self:
                 owned_buildings.append(self.gm.buildingdict[i])
         return owned_buildings
+    
+    def calculate_good(self, name):
+        '''Calculate available good
+        '''
+        ownedbuildings = self.get_owned_buildings()
+        availablegood = self.stock[str(name)]
+        for building in ownedbuildings:
+            availablegood += building.storage.get(str(name), 0)
+        return availablegood
+    
+    def buy_good(self, name, amount):
+        price = self.gm.pricelist[str(name)]
+        if self.get_money() < (amount * price):
+            amount = int(self.get_money() / price)
+        goods = self.gm.tradingpost.sell_storage(str(name), amount)
+        self.set_money(self.get_money() - (goods * price))
+        return goods
 
     def update_colonist(self):
         if self.state != "Dead":
@@ -86,42 +105,65 @@ class Colonist(Agent):
                 self.stock["health"] -= 1
             if self.stock["health"] <= 0:
                 self.state = "Dead"
+        
+        # debug print
+        print "Colonist %s, name %s, job %s, money %s, food %s, health %s" % (self.id, self.name, self.job, self.stock["money"], self.stock["food"], self.stock["health"])
 
     def update_AI(self):
-        """ Update yearly AI.
-        """
+        '''Update AI
+        '''
+        
+        # Update daily AI
+        
+        # Update seasonal AI
+        if self.gm.calendar_instance.get_day_in_year() == 0:
+           
+            seasonalfood = 10
+            
+            # Calculate available food.
+            availablefood = self.calculate_good("food")
+
+            # Calculate available clothing.
+            availableclothing = self.calculate_good("clothing")
+
+            # Populate shopping list
+            neededfood = seasonalfood - availablefood
+            if neededfood > 0:
+                self.shopping_list["food"] = neededfood
+                
+            # Buy food
+            self.stock["food"] = self.stock["food"] + self.buy_good("food", neededfood)
+        
+        # Update yearly AI
         if (self.gm.calendar_instance.get_season() == 0) & (self.gm.calendar_instance.get_day_in_year() == 0):
             """ Update AI according to Maslov's pyramid. Calculate replenishment
             of personal stock.
             """
-            ownedbuildings = self.get_owned_buildings()
+            
             yearlyfood = 40 * 2 + 20   # food for 40 days plus 20 reserve
             yearlyclothing = 40 * 2 + 20
 
-            """ Calculate available food.
-            """
-            availablefood = self.stock["food"]
-            for building in ownedbuildings:
-                availablefood += building.storage.get("food", 0)
+            # Calculate available food.
+            availablefood = self.calculate_good("food")
 
-            """Calculate available clothing.
-            """
-            availableclothing = self.stock["clothing"]
-            for building in ownedbuildings:
-                availableclothing += building.storage.get("clothing", 0)
+            # Calculate available clothing.
+            availableclothing = self.calculate_good("clothing")
 
+            # Populate shopping list
             neededfood = yearlyfood - availablefood
-            if neededfood < 0:
+            if neededfood <= 0:
                 neededfood = 0
+            else:
+                self.shopping_list["food"] = neededfood
+            # Buy food
+            self.stock["food"] = self.stock["food"] + self.buy_good("food", neededfood)
+                
+                
             neededclothing = yearlyclothing - availableclothing
             if neededclothing < 0:
                 neededclothing = 0
 
             neededmoney = (neededfood * self.gm.pricelist["food"]) + (neededclothing * self.gm.pricelist["clothing"])
             print "This year, colonist " + self.name + " needs " + str(neededmoney) + " money."
-
-        """ Update seasonal AI.
-        """
-
-        """ Update daily AI
-        """
+            
+    

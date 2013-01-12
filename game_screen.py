@@ -83,7 +83,7 @@ class GameScreen(object):
             job.set(colonist.job)
             self.joblist.append(job)
             skill = StringVar()
-            skill.set(colonist.stock["farmingSkill"])
+            skill.set(colonist.stock["farming_skill"])
             self.skilllist.append(skill)
             place = StringVar()
             place.set(colonist.place.get_placename())
@@ -144,7 +144,7 @@ class GameScreen(object):
             self.clothinglist[i].set(self.gi.model_instance.colonistlist[i].stock["clothing"])
             self.moneylist[i].set(self.gi.model_instance.colonistlist[i].stock["money"])
             self.joblist[i].set(self.gi.model_instance.colonistlist[i].job)
-            self.skilllist[i].set(self.gi.model_instance.colonistlist[i].stock["farmingSkill"])
+            self.skilllist[i].set(self.gi.model_instance.colonistlist[i].stock["farming_skill"])
             self.placelist[i].set(self.gi.model_instance.colonistlist[i].placename)
             i += 1
 

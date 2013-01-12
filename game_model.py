@@ -35,13 +35,12 @@ class GameModel(object):
                              9: House(self, 0, 8, self.colonistlist[8])}
         
         self.tradingpost = TradingPost(self, 0, 9)
-        self.tradingpost.store = {"money": 1000, "food": 1000,
-                                  "clothing": 1000}
-        self.pricelist = {"food": 10, "clothing": 10}
+
+        self.pricelist = {"food": 2, "clothing": 2}
         
-        self.workplacelist = [Farm(self, 0, 10, self.state, 1)]
+        self.workplacelist = [Farm(self, 0, 10, self.state, 1)] # List of Farm objects
         
-        self.jm = JobManager(self.colonistlist, self.workplacelist)
+        self.jm = JobManager(self.state, self.colonistlist, self.workplacelist)
 
     def create_colonist(self, name):
         self.colonist_counter += 1

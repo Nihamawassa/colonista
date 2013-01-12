@@ -75,7 +75,16 @@ class TradingPost(Building):
         Building.__init__(self, gamemodel, x, y)
 
         self.name = "Trading Post"
+        self.storage = {"money": 1000, "food": 1000, "clothing": 1000}
         self.change_owner(self.owner, self.gm.state)
+        
+    def sell_storage(self, name, amount):
+        if amount > self.storage[str(name)]:
+            amount = self.storage[str(name)]
+        self.storage[str(name)] = self.storage[str(name)] - amount
+        price = self.gm.pricelist[str(name)]
+        self.storage["money"] = self.storage["money"] + (amount * price)
+        return amount
 
 
 class Workplace(Building):
@@ -88,7 +97,7 @@ class Workplace(Building):
 
         self.id = id
         self.active = True
-        self.wage = 0
+        self.wage = 10
 
     def update_workplace(self):
         if self.active:
@@ -106,16 +115,18 @@ class Farm(Workplace):
         self.name = "Farm"
         self.set_placename(self.name)
         self.job_name = "farmwork"
+        self.job_skill = "farming_skill"
+        self.job_duration = 10  # duration of job in turns/days
 
         # input factors and coefficients
-        self.fields = 1
+        self.fields = 2
         self.field_technology = 1
         self.needed_workers = 0
         self.contracted_workers = 0
-        self.worker_skill = 0
+        self.worker_skill = 1
 
         # output factors and coefficients
-        self.food = 0
+        self.storage = {"food": 0}
         self.food_output = 3
 
     def expand_farm(self):
@@ -123,7 +134,7 @@ class Farm(Workplace):
     
     def initialize_production(self):
         if self.active == True:
-            self.needed_workers = self.fields
+            self.needed_workers = self.fields - self.contracted_workers
     
     def update_workplace(self):
         if self.active == True:
@@ -131,6 +142,10 @@ class Farm(Workplace):
             self.make_labor_contracts()
             self.calculate_output()
             self.calculate_costs()
+            self.clear_storage()
+        
+        # debug print
+        print "Workplace %s, name %s, fields %s, needed workers %s, contracted workers %s, food %s" % (self.id, self.name, self.fields, self.needed_workers, self.contracted_workers, self.storage["food"])
 
     def make_labor_contracts(self):
         pass
@@ -141,10 +156,15 @@ class Farm(Workplace):
         """
         input1 = self.fields / (self.field_technology * 1)
         input2 = self.contracted_workers / (self.worker_skill * 1)
-        self.food = self.food + self.food_output * min(input1, input2)
+        self.storage["food"] = self.storage["food"] + self.food_output * min(input1, input2)
 
     def calculate_costs(self):
         pass
+    
+    def clear_storage(self):
+        if self.storage["food"] > 0:
+            self.gm.tradingpost.storage["food"] += self.storage["food"]
+            self.storage["food"] = 0
     
     def set_wage(self, wage):
         self.wage = wage
